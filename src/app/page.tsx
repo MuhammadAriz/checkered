@@ -1,3 +1,9 @@
+import CheckersBoard from '@/components/CheckersBoard';
+
 export default function Home() {
-  return <></>;
+  return (
+    <main>
+      <CheckersBoard />
+    </main>
+  );
 }

@@ -40,6 +40,12 @@ export default {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
+        // Custom Game Colors
+        'board-dark': 'hsl(var(--board-dark))',
+        'board-light': 'hsl(var(--board-light))',
+        'piece-dark': 'hsl(var(--piece-dark))',
+        'piece-light': 'hsl(var(--piece-light))',
+        'king-crown': 'hsl(var(--king-crown))',
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
