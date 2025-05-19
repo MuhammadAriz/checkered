@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -5,6 +6,7 @@ import { RefreshCw, Undo } from 'lucide-react';
 import BoardSquare from './BoardSquare';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Board, Position, Move, GameState, Player } from '@/types/checkers';
 import {
     initializeBoard,
@@ -46,9 +48,9 @@ const CheckersBoard: React.FC = () => {
    // Undo the last move
    const undoMove = useCallback(() => {
        setHistory(prev => {
-           const lastState = prev.slice(0, -1); // Get all but the last state
+           const lastState = prev.slice(0, -1);
            const newState = lastState[lastState.length - 1] || initialGameState;
-           setGameState(newState); // Restore the previous state
+           setGameState(newState);
            return lastState;
        });
    }, []);
@@ -58,43 +60,35 @@ const CheckersBoard: React.FC = () => {
       const { board, currentPlayer, selectedPiece, isMultiCapture, mustCapturePiece } = gameState;
       const piece = board[pos.row][pos.col];
 
-      // If in multi-capture mode, only the designated piece can be selected/moved
       if (isMultiCapture && mustCapturePiece && (pos.row !== mustCapturePiece.row || pos.col !== mustCapturePiece.col)) {
           return;
       }
 
-      // Only allow clicking own pieces
       if (!piece || piece.player !== currentPlayer) {
         setGameState(prev => ({ ...prev, selectedPiece: null, possibleMoves: [] }));
         return;
       }
 
-      // Check if a capture is mandatory
       const captureIsMandatory = mustCapture(board, currentPlayer);
       const availableMoves = getPossibleMoves(board, pos, currentPlayer);
 
-      // Filter moves: if capture is mandatory, only allow capture moves
       const validMoves = captureIsMandatory
           ? availableMoves.filter(move => move.captured)
           : availableMoves;
 
-      // If clicking the same piece, deselect it (unless in multi-capture)
       if (!isMultiCapture && selectedPiece && selectedPiece.row === pos.row && selectedPiece.col === pos.col) {
           setGameState(prev => ({ ...prev, selectedPiece: null, possibleMoves: [] }));
       } else if (validMoves.length > 0) {
-           // If not mandatory capture, or if this piece has capture moves when mandatory
           if (!captureIsMandatory || validMoves.some(m => m.from.row === pos.row && m.from.col === pos.col)) {
               setGameState(prev => ({
                   ...prev,
                   selectedPiece: pos,
-                  possibleMoves: validMoves.filter(m => m.from.row === pos.row && m.from.col === pos.col) // Only show moves for this piece
+                  possibleMoves: validMoves.filter(m => m.from.row === pos.row && m.from.col === pos.col)
               }));
           } else {
-             // Capture is mandatory, but this piece has no capture moves
              setGameState(prev => ({ ...prev, selectedPiece: null, possibleMoves: [] }));
           }
       } else {
-         // No valid moves for this piece
          setGameState(prev => ({ ...prev, selectedPiece: null, possibleMoves: [] }));
       }
 
@@ -103,12 +97,12 @@ const CheckersBoard: React.FC = () => {
    const handleSquareClick = useCallback((pos: Position) => {
        const { selectedPiece, possibleMoves, board, currentPlayer, isMultiCapture } = gameState;
 
-       if (!selectedPiece) return; // No piece selected
+       if (!selectedPiece) return;
 
        const move = possibleMoves.find(m => m.to.row === pos.row && m.to.col === pos.col);
 
        if (move) {
-           saveHistory(gameState); // Save state before making the move
+           saveHistory(gameState); 
 
            const newBoard = applyMove(board, move);
            const wasCapture = !!move.captured;
@@ -116,14 +110,12 @@ const CheckersBoard: React.FC = () => {
            let continueCapture = false;
            let nextMustCapturePiece = null;
 
-           // Check for multi-capture possibility
            if (wasCapture && canContinueCapture(newBoard, move.to, currentPlayer)) {
-               // Check if the *same player* MUST capture again from the new position
                const furtherCaptures = getCaptureMoves(newBoard, currentPlayer).filter(m => m.from.row === move.to.row && m.from.col === move.to.col);
                if (furtherCaptures.length > 0) {
-                  nextPlayer = currentPlayer; // Same player's turn again
+                  nextPlayer = currentPlayer; 
                   continueCapture = true;
-                  nextMustCapturePiece = move.to; // This piece must continue the capture
+                  nextMustCapturePiece = move.to; 
                }
            }
 
@@ -132,15 +124,14 @@ const CheckersBoard: React.FC = () => {
            setGameState({
                board: newBoard,
                currentPlayer: nextPlayer,
-               selectedPiece: continueCapture ? move.to : null, // Keep piece selected if multi-capture continues
-               possibleMoves: continueCapture ? getPossibleMoves(newBoard, move.to, currentPlayer).filter(m => m.captured) : [], // Only show capture moves if continuing
+               selectedPiece: continueCapture ? move.to : null,
+               possibleMoves: continueCapture ? getPossibleMoves(newBoard, move.to, currentPlayer).filter(m => m.captured) : [],
                winner: winner,
                isMultiCapture: continueCapture,
                mustCapturePiece: nextMustCapturePiece,
            });
 
        } else {
-            // Clicked on an invalid square, deselect if not in multi-capture
             if (!isMultiCapture) {
                setGameState(prev => ({ ...prev, selectedPiece: null, possibleMoves: [] }));
             }
@@ -149,78 +140,94 @@ const CheckersBoard: React.FC = () => {
 
 
   useEffect(() => {
-    // Pre-calculate mandatory captures for the current player when their turn starts
     if (!gameState.isMultiCapture && !gameState.winner) {
         const captureIsMandatory = mustCapture(gameState.board, gameState.currentPlayer);
-        if (captureIsMandatory) {
-             // Optionally highlight pieces that MUST capture, or just enforce the rule.
-             // For simplicity, we'll just enforce the rule in handlePieceClick.
-             // We could potentially update possibleMoves here for all mandatory capture pieces.
-        }
+        // Further logic if needed when mandatory capture is detected at turn start
     }
   }, [gameState.currentPlayer, gameState.board, gameState.isMultiCapture, gameState.winner]);
 
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-background">
-      <h1 className="text-3xl font-bold mb-4 text-foreground">Checkered</h1>
+    <div className="flex flex-col items-center p-4 md:p-8 min-h-screen bg-background text-foreground">
+      <h1 className="text-4xl font-bold mb-8">Checkered</h1>
 
-        {gameState.winner && (
-            <Alert variant={gameState.winner === 'draw' ? 'default' : 'default'} className="mb-4 bg-accent text-accent-foreground">
-            <AlertTitle className="font-bold text-lg">Game Over!</AlertTitle>
-            <AlertDescription>
+      <div className="flex flex-col lg:flex-row gap-8 w-full max-w-6xl">
+        {/* Left Panel: Game Status & Info */}
+        <div className="lg:w-72 w-full flex-shrink-0 order-2 lg:order-1 flex flex-col gap-6">
+          {gameState.winner && (
+            <Alert variant={gameState.winner === 'draw' ? 'default' : 'default'} className="bg-accent text-accent-foreground">
+              <AlertTitle className="font-bold text-lg">Game Over!</AlertTitle>
+              <AlertDescription>
                 {gameState.winner === 'draw' ? 'The game is a draw!' : `Player ${gameState.winner === 'light' ? 'Light (Gray)' : 'Dark (Red)'} wins!`}
-            </AlertDescription>
+              </AlertDescription>
             </Alert>
-        )}
+          )}
 
-       {!gameState.winner && (
-            <div className="mb-4 text-lg font-semibold text-foreground">
-            Turn:
-            <span className={cn("ml-2 px-2 py-1 rounded", gameState.currentPlayer === 'light' ? 'bg-piece-light text-black' : 'bg-piece-dark text-white')}>
-                {gameState.currentPlayer === 'light' ? 'Light (Gray)' : 'Dark (Red)'}
-            </span>
-            {gameState.isMultiCapture && <span className="ml-2 text-sm text-destructive">(Must complete capture)</span>}
-            </div>
-       )}
+          {!gameState.winner && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl text-center lg:text-left">Current Turn</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center gap-2">
+                <span className={cn(
+                  "px-4 py-2 rounded-md text-lg font-semibold",
+                  gameState.currentPlayer === 'light' ? 'bg-piece-light text-black' : 'bg-piece-dark text-white'
+                )}>
+                  {gameState.currentPlayer === 'light' ? 'Light (Gray)' : 'Dark (Red)'}
+                </span>
+                {gameState.isMultiCapture && (
+                  <span className="text-sm text-destructive font-medium">(Must complete capture)</span>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
+          <Card className="mt-auto">
+             <CardHeader>
+               <CardTitle className="text-lg text-center lg:text-left">Game Controls</CardTitle>
+             </CardHeader>
+             <CardContent className="flex flex-col gap-3">
+                <Button onClick={resetGame} variant="outline" className="w-full">
+                  <RefreshCw className="mr-2 h-4 w-4" /> Reset Game
+                </Button>
+                <Button onClick={undoMove} variant="outline" disabled={history.length === 0} className="w-full">
+                  <Undo className="mr-2 h-4 w-4" /> Undo Move
+                </Button>
+             </CardContent>
+          </Card>
+        </div>
 
-      <div
-        className="grid grid-cols-8 border-4 border-gray-800 shadow-xl"
-        style={{ width: 'fit-content' }}
-        role="grid"
-        aria-label="Checkers board"
-      >
-        {gameState.board.map((row, rowIndex) =>
-          row.map((square, colIndex) => {
-            const pos = { row: rowIndex, col: colIndex };
-            const isDark = (rowIndex + colIndex) % 2 !== 0;
-            const isSelected = gameState.selectedPiece?.row === rowIndex && gameState.selectedPiece?.col === colIndex;
-            const isValidMove = gameState.possibleMoves.some(move => move.to.row === rowIndex && move.to.col === colIndex);
+        {/* Right Panel: Checkers Board */}
+        <div className="flex-grow flex justify-center items-start order-1 lg:order-2">
+          <div
+            className="grid grid-cols-8 border-4 border-gray-800 shadow-xl"
+            style={{ width: 'fit-content' }}
+            role="grid"
+            aria-label="Checkers board"
+          >
+            {gameState.board.map((row, rowIndex) =>
+              row.map((square, colIndex) => {
+                const pos = { row: rowIndex, col: colIndex };
+                const isDark = (rowIndex + colIndex) % 2 !== 0;
+                const isSelected = gameState.selectedPiece?.row === rowIndex && gameState.selectedPiece?.col === colIndex;
+                const isValidMove = gameState.possibleMoves.some(move => move.to.row === rowIndex && move.to.col === colIndex);
 
-            return (
-              <BoardSquare
-                key={`${rowIndex}-${colIndex}`}
-                square={square}
-                position={pos}
-                isDark={isDark}
-                isSelected={isSelected}
-                isValidMove={isValidMove}
-                onSquareClick={handleSquareClick}
-                onPieceClick={handlePieceClick}
-              />
-            );
-          })
-        )}
-      </div>
-
-      <div className="mt-6 flex gap-4">
-        <Button onClick={resetGame} variant="outline">
-          <RefreshCw className="mr-2 h-4 w-4" /> Reset Game
-        </Button>
-         <Button onClick={undoMove} variant="outline" disabled={history.length === 0}>
-          <Undo className="mr-2 h-4 w-4" /> Undo Move
-        </Button>
+                return (
+                  <BoardSquare
+                    key={`${rowIndex}-${colIndex}`}
+                    square={square}
+                    position={pos}
+                    isDark={isDark}
+                    isSelected={isSelected}
+                    isValidMove={isValidMove}
+                    onSquareClick={handleSquareClick}
+                    onPieceClick={handlePieceClick}
+                  />
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
