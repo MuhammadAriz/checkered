@@ -149,11 +149,11 @@ const CheckersBoard: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center p-4 md:p-8 min-h-screen bg-background text-foreground">
-      <h1 className="text-4xl font-bold mb-8">Checkered</h1>
-
       <div className="flex flex-col lg:flex-row gap-8 w-full max-w-6xl">
-        {/* Left Panel: Game Status & Info */}
+        {/* Left Panel: Game Title, Status & Info */}
         <div className="lg:w-72 w-full flex-shrink-0 order-2 lg:order-1 flex flex-col gap-6">
+          <h1 className="text-4xl font-bold text-center lg:text-left">Checkered</h1>
+          
           {gameState.winner && (
             <Alert variant={gameState.winner === 'draw' ? 'default' : 'default'} className="bg-accent text-accent-foreground">
               <AlertTitle className="font-bold text-lg">Game Over!</AlertTitle>
@@ -234,3 +234,4 @@ const CheckersBoard: React.FC = () => {
 };
 
 export default CheckersBoard;
+
