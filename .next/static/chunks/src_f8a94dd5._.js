@@ -32,22 +32,25 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$
 'use client';
 ;
 ;
-const CheckerPiece = ({ piece, position, isSelected, onClick })=>{
+const CheckerPiece = ({ piece, position, isSelected, isForcedToCapture, onClick })=>{
     const pieceColorClass = piece.player === 'dark' ? 'checker-piece-dark' : 'checker-piece-light';
     const kingClass = piece.isKing ? 'checker-piece-king' : '';
     const selectedClass = isSelected ? 'checker-piece-selected' : '';
+    // Apply forced capture class only if it's forced and NOT already selected
+    const forcedCaptureClass = isForcedToCapture && !isSelected ? 'checker-piece-forced-capture' : '';
     const handleClick = ()=>{
         onClick(position);
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])('checker-piece', pieceColorClass, kingClass, selectedClass),
+        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])('checker-piece', pieceColorClass, kingClass, selectedClass, forcedCaptureClass // Add new class
+        ),
         onClick: handleClick,
         role: "button",
-        "aria-label": `Checker piece at row ${position.row + 1}, column ${position.col + 1}, color ${piece.player}${piece.isKing ? ', king' : ''}`,
+        "aria-label": `Checker piece at row ${position.row + 1}, column ${position.col + 1}, color ${piece.player}${piece.isKing ? ', king' : ''}${isForcedToCapture ? ', must capture' : ''}`,
         "aria-pressed": isSelected
     }, void 0, false, {
         fileName: "[project]/src/components/CheckerPiece.tsx",
-        lineNumber: 24,
+        lineNumber: 35,
         columnNumber: 5
     }, this);
 };
@@ -74,7 +77,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$Checker
 ;
 ;
 ;
-const BoardSquare = ({ square, position, isDark, isSelected, isValidMove, onSquareClick, onPieceClick })=>{
+const BoardSquare = ({ square, position, isDark, isSelected, isValidMove, isForcedToCapture, onSquareClick, onPieceClick })=>{
     const squareColorClass = isDark ? 'board-square-dark' : 'board-square-light';
     const highlightClass = isSelected ? 'board-square-highlight' : '';
     const validMoveClass = isValidMove ? 'board-square-valid-move' : '';
@@ -89,20 +92,21 @@ const BoardSquare = ({ square, position, isDark, isSelected, isValidMove, onSqua
         onClick: handleClick,
         role: "gridcell",
         "aria-selected": isSelected,
-        "aria-label": `Square at row ${position.row + 1}, column ${position.col + 1}, ${isDark ? 'dark' : 'light'}${square ? `, contains ${square.player} piece${square.isKing ? ' (king)' : ''}` : ', empty'}${isValidMove ? ', valid move target' : ''}`,
+        "aria-label": `Square at row ${position.row + 1}, column ${position.col + 1}, ${isDark ? 'dark' : 'light'}${square ? `, contains ${square.player} piece${square.isKing ? ' (king)' : ''}` : ', empty'}${isValidMove ? ', valid move target' : ''}${isForcedToCapture && square ? ', mandatory capture piece' : ''}`,
         children: square && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$CheckerPiece$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
             piece: square,
             position: position,
             isSelected: isSelected,
+            isForcedToCapture: isForcedToCapture,
             onClick: onPieceClick
         }, void 0, false, {
             fileName: "[project]/src/components/BoardSquare.tsx",
-            lineNumber: 47,
+            lineNumber: 50,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/BoardSquare.tsx",
-        lineNumber: 39,
+        lineNumber: 42,
         columnNumber: 5
     }, this);
 };
@@ -799,11 +803,13 @@ const CheckersBoard = ()=>{
     _s();
     const [gameState, setGameState] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(initialGameState);
     const [history, setHistory] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]); // For undo functionality
+    const [forcedCapturePieceInfo, setForcedCapturePieceInfo] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     // Reset game to initial state
     const resetGame = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "CheckersBoard.useCallback[resetGame]": ()=>{
             setGameState(initialGameState);
             setHistory([]);
+            setForcedCapturePieceInfo(null);
         }
     }["CheckersBoard.useCallback[resetGame]"], []);
     // Save current state to history
@@ -822,14 +828,60 @@ const CheckersBoard = ()=>{
         "CheckersBoard.useCallback[undoMove]": ()=>{
             setHistory({
                 "CheckersBoard.useCallback[undoMove]": (prev)=>{
-                    const lastState = prev.slice(0, -1);
-                    const newState = lastState[lastState.length - 1] || initialGameState;
+                    const lastStateArray = prev.slice(0, -1);
+                    const newState = lastStateArray[lastStateArray.length - 1] || initialGameState;
                     setGameState(newState);
-                    return lastState;
+                    return lastStateArray;
                 }
             }["CheckersBoard.useCallback[undoMove]"]);
         }
     }["CheckersBoard.useCallback[undoMove]"], []);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "CheckersBoard.useEffect": ()=>{
+            if (gameState.winner) {
+                setForcedCapturePieceInfo(null);
+                return;
+            }
+            if (gameState.isMultiCapture && gameState.mustCapturePiece) {
+                setForcedCapturePieceInfo(gameState.mustCapturePiece);
+            } else {
+                const mandatory = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$checkersLogic$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["mustCapture"])(gameState.board, gameState.currentPlayer);
+                if (mandatory) {
+                    const board = gameState.board;
+                    const player = gameState.currentPlayer;
+                    let pieceToHighlight = null;
+                    for(let r = 0; r < __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$checkersLogic$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BOARD_SIZE"]; r++){
+                        for(let c = 0; c < __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$checkersLogic$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["BOARD_SIZE"]; c++){
+                            const currentPiecePos = {
+                                row: r,
+                                col: c
+                            };
+                            const piece = board[r][c];
+                            if (piece && piece.player === player) {
+                                const moves = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$checkersLogic$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getPossibleMoves"])(board, currentPiecePos, player);
+                                if (moves.some({
+                                    "CheckersBoard.useEffect": (move)=>move.captured
+                                }["CheckersBoard.useEffect"])) {
+                                    pieceToHighlight = currentPiecePos;
+                                    break;
+                                }
+                            }
+                        }
+                        if (pieceToHighlight) break;
+                    }
+                    setForcedCapturePieceInfo(pieceToHighlight);
+                } else {
+                    setForcedCapturePieceInfo(null);
+                }
+            }
+        }
+    }["CheckersBoard.useEffect"], [
+        gameState.board,
+        gameState.currentPlayer,
+        gameState.winner,
+        gameState.isMultiCapture,
+        gameState.mustCapturePiece
+    ]);
     const handlePieceClick = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "CheckersBoard.useCallback[handlePieceClick]": (pos)=>{
             const { board, currentPlayer, selectedPiece, isMultiCapture, mustCapturePiece } = gameState;
@@ -883,13 +935,15 @@ const CheckersBoard = ()=>{
                     }["CheckersBoard.useCallback[handlePieceClick]"]);
                 }
             } else {
-                setGameState({
-                    "CheckersBoard.useCallback[handlePieceClick]": (prev)=>({
-                            ...prev,
-                            selectedPiece: null,
-                            possibleMoves: []
-                        })
-                }["CheckersBoard.useCallback[handlePieceClick]"]);
+                if (!isMultiCapture) {
+                    setGameState({
+                        "CheckersBoard.useCallback[handlePieceClick]": (prev)=>({
+                                ...prev,
+                                selectedPiece: null,
+                                possibleMoves: []
+                            })
+                    }["CheckersBoard.useCallback[handlePieceClick]"]);
+                }
             }
         }
     }["CheckersBoard.useCallback[handlePieceClick]"], [
@@ -949,9 +1003,13 @@ const CheckersBoard = ()=>{
     ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "CheckersBoard.useEffect": ()=>{
+            // This effect can be used for side-effects when a turn starts and mandatory capture is detected,
+            // but the main logic for highlighting is now in the other useEffect.
             if (!gameState.isMultiCapture && !gameState.winner) {
                 const captureIsMandatory = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$checkersLogic$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["mustCapture"])(gameState.board, gameState.currentPlayer);
-            // Further logic if needed when mandatory capture is detected at turn start
+                if (captureIsMandatory) {
+                // console.log("Capture is mandatory for player:", gameState.currentPlayer);
+                }
             }
         }
     }["CheckersBoard.useEffect"], [
@@ -973,32 +1031,32 @@ const CheckersBoard = ()=>{
                             children: "Checkered"
                         }, void 0, false, {
                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                            lineNumber: 155,
+                            lineNumber: 198,
                             columnNumber: 11
                         }, this),
                         gameState.winner && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Alert"], {
-                            variant: gameState.winner === 'draw' ? 'default' : 'default',
-                            className: "bg-accent text-accent-foreground",
+                            variant: gameState.winner === 'draw' ? 'default' : 'destructive',
+                            className: gameState.winner !== 'draw' ? "bg-accent text-accent-foreground" : "",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertTitle"], {
                                     className: "font-bold text-lg",
                                     children: "Game Over!"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 159,
+                                    lineNumber: 202,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AlertDescription"], {
                                     children: gameState.winner === 'draw' ? 'The game is a draw!' : `Player ${gameState.winner === 'light' ? 'Light (Gray)' : 'Dark (Red)'} wins!`
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 160,
+                                    lineNumber: 203,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                            lineNumber: 158,
+                            lineNumber: 201,
                             columnNumber: 13
                         }, this),
                         !gameState.winner && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -1009,43 +1067,43 @@ const CheckersBoard = ()=>{
                                         children: "Current Turn"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/CheckersBoard.tsx",
-                                        lineNumber: 169,
+                                        lineNumber: 212,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 168,
+                                    lineNumber: 211,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
-                                    className: "flex flex-col items-center gap-2",
+                                    className: "flex flex-col items-center lg:items-start gap-2",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("px-4 py-2 rounded-md text-lg font-semibold", gameState.currentPlayer === 'light' ? 'bg-piece-light text-black' : 'bg-piece-dark text-white'),
                                             children: gameState.currentPlayer === 'light' ? 'Light (Gray)' : 'Dark (Red)'
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                                            lineNumber: 172,
+                                            lineNumber: 215,
                                             columnNumber: 17
                                         }, this),
-                                        gameState.isMultiCapture && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        (gameState.isMultiCapture || forcedCapturePieceInfo && !gameState.selectedPiece) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "text-sm text-destructive font-medium",
-                                            children: "(Must complete capture)"
+                                            children: "(Must capture)"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                                            lineNumber: 179,
+                                            lineNumber: 222,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 171,
+                                    lineNumber: 214,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                            lineNumber: 167,
+                            lineNumber: 210,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -1057,12 +1115,12 @@ const CheckersBoard = ()=>{
                                         children: "Game Controls"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/CheckersBoard.tsx",
-                                        lineNumber: 187,
+                                        lineNumber: 230,
                                         columnNumber: 16
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 186,
+                                    lineNumber: 229,
                                     columnNumber: 14
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1077,52 +1135,52 @@ const CheckersBoard = ()=>{
                                                     className: "mr-2 h-4 w-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                                    lineNumber: 191,
+                                                    lineNumber: 234,
                                                     columnNumber: 19
                                                 }, this),
                                                 " Reset Game"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                                            lineNumber: 190,
+                                            lineNumber: 233,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                             onClick: undoMove,
                                             variant: "outline",
-                                            disabled: history.length === 0,
+                                            disabled: history.length === 0 || gameState.winner !== null,
                                             className: "w-full",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$undo$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Undo$3e$__["Undo"], {
                                                     className: "mr-2 h-4 w-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                                    lineNumber: 194,
+                                                    lineNumber: 237,
                                                     columnNumber: 19
                                                 }, this),
                                                 " Undo Move"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                                            lineNumber: 193,
+                                            lineNumber: 236,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 189,
+                                    lineNumber: 232,
                                     columnNumber: 14
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/CheckersBoard.tsx",
-                            lineNumber: 185,
+                            lineNumber: 228,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                    lineNumber: 154,
+                    lineNumber: 197,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1142,43 +1200,45 @@ const CheckersBoard = ()=>{
                                 const isDark = (rowIndex + colIndex) % 2 !== 0;
                                 const isSelected = gameState.selectedPiece?.row === rowIndex && gameState.selectedPiece?.col === colIndex;
                                 const isValidMove = gameState.possibleMoves.some((move)=>move.to.row === rowIndex && move.to.col === colIndex);
+                                const isForcedToCapturePiece = forcedCapturePieceInfo?.row === rowIndex && forcedCapturePieceInfo?.col === colIndex;
                                 return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$BoardSquare$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                     square: square,
                                     position: pos,
                                     isDark: isDark,
                                     isSelected: isSelected,
                                     isValidMove: isValidMove,
+                                    isForcedToCapture: isForcedToCapturePiece,
                                     onSquareClick: handleSquareClick,
                                     onPieceClick: handlePieceClick
                                 }, `${rowIndex}-${colIndex}`, false, {
                                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                                    lineNumber: 216,
+                                    lineNumber: 260,
                                     columnNumber: 19
                                 }, this);
                             }))
                     }, void 0, false, {
                         fileName: "[project]/src/components/CheckersBoard.tsx",
-                        lineNumber: 202,
+                        lineNumber: 245,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/src/components/CheckersBoard.tsx",
-                    lineNumber: 201,
+                    lineNumber: 244,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/CheckersBoard.tsx",
-            lineNumber: 152,
+            lineNumber: 195,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/components/CheckersBoard.tsx",
-        lineNumber: 151,
+        lineNumber: 194,
         columnNumber: 5
     }, this);
 };
-_s(CheckersBoard, "OMjRSSl0K9GpNlVjMBjZrZq34Ug=");
+_s(CheckersBoard, "Bk6Os3mdpDtUmA+jupzn0t/IsTg=");
 _c = CheckersBoard;
 const __TURBOPACK__default__export__ = CheckersBoard;
 var _c;

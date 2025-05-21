@@ -1,3 +1,4 @@
+
 'use client';
 
 import type React from 'react';
@@ -11,6 +12,7 @@ interface BoardSquareProps {
   isDark: boolean;
   isSelected: boolean;
   isValidMove: boolean;
+  isForcedToCapture: boolean; // New prop
   onSquareClick: (pos: Position) => void;
   onPieceClick: (pos: Position) => void;
 }
@@ -21,6 +23,7 @@ const BoardSquare: React.FC<BoardSquareProps> = ({
   isDark,
   isSelected,
   isValidMove,
+  isForcedToCapture, // Destructure new prop
   onSquareClick,
   onPieceClick,
 }) => {
@@ -41,13 +44,14 @@ const BoardSquare: React.FC<BoardSquareProps> = ({
       onClick={handleClick}
       role="gridcell"
       aria-selected={isSelected}
-      aria-label={`Square at row ${position.row + 1}, column ${position.col + 1}, ${isDark ? 'dark' : 'light'}${square ? `, contains ${square.player} piece${square.isKing ? ' (king)' : ''}` : ', empty'}${isValidMove ? ', valid move target' : ''}`}
+      aria-label={`Square at row ${position.row + 1}, column ${position.col + 1}, ${isDark ? 'dark' : 'light'}${square ? `, contains ${square.player} piece${square.isKing ? ' (king)' : ''}` : ', empty'}${isValidMove ? ', valid move target' : ''}${isForcedToCapture && square ? ', mandatory capture piece' : ''}`}
     >
       {square && (
         <CheckerPiece
           piece={square}
           position={position}
           isSelected={isSelected}
+          isForcedToCapture={isForcedToCapture} // Pass down
           onClick={onPieceClick}
         />
       )}

@@ -377,8 +377,8 @@ body {
 
 .board-square {
   display: flex;
-  height: 3.5rem;
-  width: 3.5rem;
+  height: 3rem;
+  width: 3rem;
   align-items: center;
   justify-content: center;
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
@@ -389,8 +389,8 @@ body {
 
 @media (width >= 768px) {
   .board-square {
-    height: 4rem;
-    width: 4rem;
+    height: 3.5rem;
+    width: 3.5rem;
   }
 }
 
@@ -418,8 +418,8 @@ body {
   content: "";
   position: absolute;
   display: block;
-  height: .75rem;
-  width: .75rem;
+  height: .5rem;
+  width: .5rem;
   border-radius: 9999px;
   background-color: hsl(var(--accent));
   opacity: .7;
@@ -427,15 +427,15 @@ body {
 
 @media (width >= 768px) {
   .board-square-valid-move:after {
-    height: 1rem;
-    width: 1rem;
+    height: .75rem;
+    width: .75rem;
   }
 }
 
 .checker-piece {
   display: flex;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: 2.25rem;
+  width: 2.25rem;
   cursor: pointer;
   align-items: center;
   justify-content: center;
@@ -453,8 +453,8 @@ body {
 
 @media (width >= 768px) {
   .checker-piece {
-    height: 3rem;
-    width: 3rem;
+    height: 2.5rem;
+    width: 2.5rem;
   }
 }
 
@@ -483,7 +483,7 @@ body {
 .checker-piece-king:after {
   content: "★";
   position: absolute;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   line-height: 1.75rem;
   font-weight: 700;
   color: hsl(var(--king-crown));
@@ -491,13 +491,22 @@ body {
 
 @media (width >= 768px) {
   .checker-piece-king:after {
-    font-size: 1.5rem;
-    line-height: 2rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 
 .checker-piece-king:after {
   text-shadow: 0 0 2px #000;
+}
+
+.checker-piece-forced-capture {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+  --tw-ring-color: hsl(var(--destructive));
+  --tw-ring-offset-width: 1px;
+  --tw-ring-offset-color: hsl(var(--background));
 }
 
 .sr-only {
@@ -2646,6 +2655,10 @@ body {
 
   .lg\:flex-row {
     flex-direction: row;
+  }
+
+  .lg\:items-start {
+    align-items: flex-start;
   }
 
   .lg\:text-left {

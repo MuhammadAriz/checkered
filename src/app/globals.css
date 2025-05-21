@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -107,7 +108,7 @@ body {
 /* Custom Game Styles */
 @layer components {
   .board-square {
-    @apply w-14 h-14 md:w-16 md:h-16 flex justify-center items-center transition-colors duration-150;
+    @apply w-12 h-12 md:w-14 md:h-14 flex justify-center items-center transition-colors duration-150;
   }
   .board-square-dark {
     @apply bg-board-dark;
@@ -123,11 +124,11 @@ body {
   }
   .board-square-valid-move::after {
     content: '';
-    @apply absolute block w-3 h-3 md:w-4 md:h-4 rounded-full bg-accent opacity-70;
+    @apply absolute block w-2 h-2 md:w-3 md:h-3 rounded-full bg-accent opacity-70;
   }
 
   .checker-piece {
-    @apply w-10 h-10 md:w-12 md:h-12 rounded-full shadow-md flex justify-center items-center cursor-pointer transition-transform duration-200 ease-out;
+    @apply w-9 h-9 md:w-10 md:h-10 rounded-full shadow-md flex justify-center items-center cursor-pointer transition-transform duration-200 ease-out;
   }
   .checker-piece-dark {
     @apply bg-piece-dark border-2 border-black/20;
@@ -140,7 +141,11 @@ body {
   }
   .checker-piece-king::after {
     content: '★'; /* Star or Crown symbol */
-    @apply text-king-crown text-xl md:text-2xl font-bold absolute;
+    @apply text-king-crown text-lg md:text-xl font-bold absolute;
     text-shadow: 0 0 2px black;
+  }
+  .checker-piece-forced-capture {
+    /* Highlight for pieces that must make a capture */
+    @apply ring-2 ring-destructive ring-offset-1 ring-offset-background;
   }
 }
